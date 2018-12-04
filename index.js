@@ -57,12 +57,24 @@ app.get('/prof/:profId', function (req, res) {
    });
  });
 
- app.get('/test/:testId', function (req, res) {
-   console.log('Received request for '+req.param('testId')+' from', req.ip)
+ var createProf = function(db, prenom, nom, age, metier, spe,  callback) {
+   db.collection(prenom+" "+nom).insertOne({
+      nom: nom,
+      prenom: prenom,
+      âge : age,
+      métier : metier,
+      nombre_de_cour : 0,
+      spécialité : spe,
+      avis : []
+    });
+};
+
+ app.get('/test/:prenom/:nom/:age/:metier/:spe', function (req, res) {
+   console.log('Received request for '+req.param('prenom')+" "+req.param('nom')+' from', req.ip)
    MongoClient.connect(url, function(err, dataBase) {
      assert.equal(null, err);
      const db=dataBase.db('Project-CAI');
-     createProf(db, req.param('profId'), function() {
+     createProf(db, req.param('prenom') , req.param('nom'), req.param('age'), req.param('metier'), req.param('spe'), function() {
        dataBase.close();
      });
    });
