@@ -69,7 +69,7 @@ app.get('/prof/:profId', function (req, res) {
     });
 };
 
- app.get('/test/:prenom/:nom/:age/:metier/:spe', function (req, res) {
+ app.get('/createProf/:prenom/:nom/:age/:metier/:spe', function (req, res) {
    console.log('Received request for '+req.param('prenom')+" "+req.param('nom')+' from', req.ip)
    MongoClient.connect(url, function(err, dataBase) {
      assert.equal(null, err);
