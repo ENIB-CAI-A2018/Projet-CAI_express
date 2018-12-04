@@ -43,6 +43,8 @@ var createProf = function(db, prenom, nom, age, metier, spe,  callback) {
     });
 };
 
+
+
 var createCour = function(db, prof, prix, lieu, nbrP, matiere, date, heure, duree,  callback) {
    db.collection("cours").insertOne({
       professeur : prof,
