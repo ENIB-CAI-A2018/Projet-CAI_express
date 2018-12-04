@@ -31,6 +31,32 @@ var findCours = function(db, courList,  callback) {
    });
 };
 
+var createProf = function(db, prenom, nom, age, metier, spe,  callback) {
+   db.collection(prenom+" "+nom).insertOne({
+      nom: nom,
+      prenom: prenom,
+      âge : age,
+      métier : metier,
+      nombre_de_cour : 0,
+      spécialité : spe,
+      avis : []
+    });
+};
+
+var createCour = function(db, prof, prix, lieu, nbrP, matiere, date, heure, duree,  callback) {
+   db.collection("cours").insertOne({
+      professeur : prof,
+      prix : prix,
+      lieu : lieu,
+      eleve : "",
+      nombre_de_place : nbrP,
+      matiere : matiere,
+      date : date,
+      heure : heure,
+      durée : duree
+    });
+};
+
  app.get('/cours', function (req, res) {
     console.log('Received request for cours from', req.ip)
     MongoClient.connect(url, function(err, dataBase) {
@@ -57,24 +83,24 @@ app.get('/prof/:profId', function (req, res) {
    });
  });
 
- var createProf = function(db, prenom, nom, age, metier, spe,  callback) {
-   db.collection(prenom+" "+nom).insertOne({
-      nom: nom,
-      prenom: prenom,
-      âge : age,
-      métier : metier,
-      nombre_de_cour : 0,
-      spécialité : spe,
-      avis : []
-    });
-};
-
  app.get('/createProf/:prenom/:nom/:age/:metier/:spe', function (req, res) {
    console.log('Received request for '+req.param('prenom')+" "+req.param('nom')+' from', req.ip)
    MongoClient.connect(url, function(err, dataBase) {
      assert.equal(null, err);
      const db=dataBase.db('Project-CAI');
      createProf(db, req.param('prenom') , req.param('nom'), req.param('age'), req.param('metier'), req.param('spe'), function() {
+       dataBase.close();
+     });
+   });
+ });
+
+ app.get('/createCour/:prof/:prix/:lieu/:nbrP/:matiere/:date/:heure/:duree', function (req, res) {
+   console.log('Received request for '+req.param('prof')+" "+req.param('matiere')+' from', req.ip)
+   MongoClient.connect(url, function(err, dataBase) {
+     assert.equal(null, err);
+     const db=dataBase.db('Project-CAI');
+     createCour(db, req.param('prof') , req.param('prix'), req.param('lieu'), req.param('nbrP'), req.param('matiere'), req.param('date')
+     , req.param('heure'), req.param('duree'), function() {
        dataBase.close();
      });
    });
