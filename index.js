@@ -57,14 +57,16 @@ var createCour = function(db, prof, jour, heure, longueur, places,  callback) {
   db.collection(String(prof.toLowerCase()).replace(/ /g,"_")).updateOne(
     { nom: prof}, 
     {
-      $addToSet: { 
-        cours : {
+      $addToSet: 
+      { 
+        cours : 
+        {
           jour : jour,
           heure : heure,
           longueur : longueur,
           places : places
         } 
-     }
+      }
     }
   );  
 };
@@ -113,8 +115,6 @@ app.get('/prof/:profId', function (req, res) {
      assert.equal(null, err);
      const db=dataBase.db('Project-CAI');
      createCour(db, req.param('prof') , req.param('jour'), req.param('heure'), req.param('longueur'), req.param('places'), function(test) {
-      console.log(test.nom);
-      res.json(test);
       dataBase.close();
      });
    });
