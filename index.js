@@ -51,8 +51,6 @@ var createProf = function(db, nom, age, prix, matiere, ville, adresse, numero, m
     });
 };
 
-
-
 var createCour = function(db, prof, jour, heure, longueur, places,  callback) {
   db.collection(String(prof.toLowerCase()).replace(/ /g,"_")).updateOne(
     { nom: prof}, 
