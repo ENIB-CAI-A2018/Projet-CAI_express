@@ -31,15 +31,23 @@ var findCours = function(db, courList,  callback) {
    });
 };
 
-var createProf = function(db, prenom, nom, age, metier, spe,  callback) {
-   db.collection(prenom+" "+nom).insertOne({
+var createProf = function(db, nom, age, prix, matiere, ville, adresse, numero, mail,  callback) {
+   db.collection(String(nom.toLowerCase()).replace(/ /g,"_")).insertOne({
       nom: nom,
-      prenom: prenom,
-      âge : age,
-      métier : metier,
-      nombre_de_cour : 0,
-      spécialité : spe,
-      avis : []
+      age : age,
+      prix : prix,
+      matiere : matiere,
+      ville : ville,
+      adresse : adresse,
+      contact : [numero,mail],
+      avris : [],
+      cours : []
+    });
+
+    db.collection("list_prof").insertOne({
+      professeur : nom,
+      prix : prix,
+      matiere : matiere
     });
 };
 
@@ -85,12 +93,13 @@ app.get('/prof/:profId', function (req, res) {
    });
  });
 
- app.get('/createProf/:prenom/:nom/:age/:metier/:spe', function (req, res) {
-   console.log('Received request for '+req.param('prenom')+" "+req.param('nom')+' from', req.ip)
+ app.get('/createProf/:nom/:age/:prix/:matiere/:ville/:adresse/:numero/:mail', function (req, res) {
+   console.log('Received request for '+req.param('nom')+' from', req.ip)
    MongoClient.connect(url, function(err, dataBase) {
      assert.equal(null, err);
      const db=dataBase.db('Project-CAI');
-     createProf(db, req.param('prenom') , req.param('nom'), req.param('age'), req.param('metier'), req.param('spe'), function() {
+     createProf(db, req.param('nom'), req.param('age'), req.param('prix'), req.param('matiere')
+     ,req.param('ville'), req.param('adresse'), req.param('numero'), req.param('mail'), function() {
        dataBase.close();
      });
    });
