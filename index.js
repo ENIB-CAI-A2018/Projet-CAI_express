@@ -7,7 +7,7 @@ app.use(cors())
 var MongoClient = require('mongodb').MongoClient, assert = require('assert');
 
 var findCours = function(db, courList,  callback) {
-    const cursor =db.collection('cours').find({});
+    const cursor =db.collection('list_prof').find({});
     cursor.each(function(err, doc) {
        assert.equal(err, null);
        if (doc != null) {
@@ -19,7 +19,7 @@ var findCours = function(db, courList,  callback) {
  };
 
  var findprofesseur = function(db, profId,  callback) {
-   const cursor =db.collection(profId).find({});
+   const cursor =db.collection(String(profId.toLowerCase()).replace(/ /g,"_")).find({});
    var prof;
    cursor.each(function(err, doc) {
       assert.equal(err, null);
@@ -54,19 +54,19 @@ var createProf = function(db, nom, age, prix, matiere, ville, adresse, numero, m
 
 
 var createCour = function(db, prof, jour, heure, longueur, places,  callback) {
-   db.collection(String(prof.toLowerCase()).replace(/ /g,"_")).updateOne(
+  db.collection(String(prof.toLowerCase()).replace(/ /g,"_")).updateOne(
     { nom: prof}, 
-    { $set: {
-      cours : [
-        {
+    {
+      $addToSet: { 
+        cours : {
           jour : jour,
           heure : heure,
           longueur : longueur,
           places : places
-        }
-      ]
-      }
-    }); 
+        } 
+     }
+    }
+  );  
 };
 
  app.get('/cours', function (req, res) {
@@ -112,8 +112,10 @@ app.get('/prof/:profId', function (req, res) {
    MongoClient.connect(url, function(err, dataBase) {
      assert.equal(null, err);
      const db=dataBase.db('Project-CAI');
-     createCour(db, req.param('prof') , req.param('jour'), req.param('heure'), req.param('longueur'), req.param('places'), function() {
-       dataBase.close();
+     createCour(db, req.param('prof') , req.param('jour'), req.param('heure'), req.param('longueur'), req.param('places'), function(test) {
+      console.log(test.nom);
+      res.json(test);
+      dataBase.close();
      });
    });
  });
