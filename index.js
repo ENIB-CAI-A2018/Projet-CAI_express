@@ -40,7 +40,7 @@ var createProf = function(db, nom, age, prix, matiere, ville, adresse, numero, m
       ville : ville,
       adresse : adresse,
       contact : [numero,mail],
-      avris : [],
+      avis : [],
       cours : []
     });
 
@@ -53,18 +53,20 @@ var createProf = function(db, nom, age, prix, matiere, ville, adresse, numero, m
 
 
 
-var createCour = function(db, prof, prix, lieu, nbrP, matiere, date, heure, duree,  callback) {
-   db.collection("cours").insertOne({
-      professeur : prof,
-      prix : prix,
-      lieu : lieu,
-      eleve : "",
-      nombre_de_place : nbrP,
-      matiere : matiere,
-      date : date,
-      heure : heure,
-      durée : duree
-    });
+var createCour = function(db, prof, jour, heure, longueur, places,  callback) {
+   db.collection(String(prof.toLowerCase()).replace(/ /g,"_")).updateOne(
+    { nom: prof}, 
+    { $set: {
+      cours : [
+        {
+          jour : jour,
+          heure : heure,
+          longueur : longueur,
+          places : places
+        }
+      ]
+      }
+    }); 
 };
 
  app.get('/cours', function (req, res) {
@@ -94,7 +96,7 @@ app.get('/prof/:profId', function (req, res) {
  });
 
  app.get('/createProf/:nom/:age/:prix/:matiere/:ville/:adresse/:numero/:mail', function (req, res) {
-   console.log('Received request for '+req.param('nom')+' from', req.ip)
+   console.log('Received request for create prof : '+req.param('nom')+' from', req.ip)
    MongoClient.connect(url, function(err, dataBase) {
      assert.equal(null, err);
      const db=dataBase.db('Project-CAI');
@@ -105,13 +107,12 @@ app.get('/prof/:profId', function (req, res) {
    });
  });
 
- app.get('/createCour/:prof/:prix/:lieu/:nbrP/:matiere/:date/:heure/:duree', function (req, res) {
-   console.log('Received request for '+req.param('prof')+" "+req.param('matiere')+' from', req.ip)
+ app.get('/createCour/:prof/:jour/:heure/:longueur/:places', function (req, res) {
+   console.log('Received request for create cour : '+req.param('prof')+' from', req.ip)
    MongoClient.connect(url, function(err, dataBase) {
      assert.equal(null, err);
      const db=dataBase.db('Project-CAI');
-     createCour(db, req.param('prof') , req.param('prix'), req.param('lieu'), req.param('nbrP'), req.param('matiere'), req.param('date')
-     , req.param('heure'), req.param('duree'), function() {
+     createCour(db, req.param('prof') , req.param('jour'), req.param('heure'), req.param('longueur'), req.param('places'), function() {
        dataBase.close();
      });
    });
