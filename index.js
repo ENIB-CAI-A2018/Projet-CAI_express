@@ -2,6 +2,7 @@ var express = require('express');
 var cors = require('cors');
 var bodyParser = require("body-parser");
 var app = express();
+var util = require("util");
 
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -98,13 +99,23 @@ app.get('/prof/:profId', function (req, res) {
    });
  });
 
- app.get('/createProf/:nom/:age/:prix/:matiere/:ville/:adresse/:numero/:mail', function (req, res) {
-   console.log('Received request for create prof : '+req.param('nom')+' from', req.ip)
+ app.post('/createProf', function (req, res) {
+   console.log('Received request for create prof : '+req.body.nom+' from', req.ip);
+   var nom=util.format("%j",req.body.nom);
+   nom=nom.replace('"',"");
+   nom=nom.replace('"',"");
+   console.log('Received request for create prof : '+nom);
+   var age=req.body.age;
+   var prix=req.body.prix;
+   var matiere=req.body.matiere;
+   var ville=req.body.ville;
+   var adresse=req.body.adresse;
+   var numero=req.body.contact[0];
+   var mail=req.body.contact[1];
    MongoClient.connect(url, function(err, dataBase) {
      assert.equal(null, err);
      const db=dataBase.db('Project-CAI');
-     createProf(db, req.param('nom'), req.param('age'), req.param('prix'), req.param('matiere')
-     ,req.param('ville'), req.param('adresse'), req.param('numero'), req.param('mail'), function() {
+     createProf(db, nom,age,prix,matiere,ville,adresse,numero,mail, function() {
        dataBase.close();
      });
    });
