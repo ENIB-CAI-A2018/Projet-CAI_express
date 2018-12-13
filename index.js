@@ -35,7 +35,7 @@ var findCours = function(db, courList,  callback) {
    });
 };
 
-var createProf = function(db, nom, age, prix, matiere, ville, adresse, numero, mail,  callback) {
+var createProf = function(db, nom, age, prix, matiere, ville, adresse, numero, mail,jour, heure, longueur, places,  callback) {
    db.collection(String(nom.toLowerCase()).replace(/ /g,"_")).insertOne({
       nom: nom,
       age : age,
@@ -45,7 +45,14 @@ var createProf = function(db, nom, age, prix, matiere, ville, adresse, numero, m
       adresse : adresse,
       contact : [numero,mail],
       avis : [],
-      cours : []
+      cours : [
+        {
+          jour : jour,
+          heure : heure,
+          longueur : longueur,
+          places : places
+        }
+      ]
     });
 
     db.collection("list_prof").insertOne({
@@ -103,7 +110,7 @@ app.get('/prof/:profId', function (req, res) {
    console.log('Received request for create prof : '+req.body.nom+' from', req.ip);
    var nom=util.format("%j",req.body.nom);
    nom=nom.replace('"',"");
-   nom=nom.replace('"',"");
+   nom=nom.replace('"',"");//Afin de supprimer les "" crée lors de la ganération de la chaine de caractére servant a définir le fichier json de la bdd
    console.log('Received request for create prof : '+nom);
    var age=req.body.age;
    var prix=req.body.prix;
@@ -121,16 +128,41 @@ app.get('/prof/:profId', function (req, res) {
    });
  });
 
- app.get('/createCour/:prof/:jour/:heure/:longueur/:places', function (req, res) {
-   console.log('Received request for create cour : '+req.param('prof')+' from', req.ip)
+ app.post('/createCour', function (req, res) {
+   console.log('Received request for create cour : '+req.body.nom+' from', req.ip);
+   var nom=util.format("%j",req.body.nom);
+   nom=nom.replace('"',"");
+   nom=nom.replace('"',"");
+   var jour=req.body.cours[0].jour;
+   var heure=req.body.cours[0].heure;
+   var longueur=req.body.cours[0].longueur;
+   var places=req.body.cours[0].places;
    MongoClient.connect(url, function(err, dataBase) {
-     assert.equal(null, err);
-     const db=dataBase.db('Project-CAI');
-     createCour(db, req.param('prof') , req.param('jour'), req.param('heure'), req.param('longueur'), req.param('places'), function(test) {
-      dataBase.close();
-     });
+    assert.equal(null, err);
+    const db=dataBase.db('Project-CAI');
+
+   findprofesseur(db, nom,  function(prof) {
+     if(prof==null){
+      var age=req.body.age;
+      var prix=req.body.prix;
+      var matiere=req.body.matiere;
+      var ville=req.body.ville;
+      var adresse=req.body.adresse;
+      var numero=req.body.contact[0];
+      var mail=req.body.contact[1];
+      createProf(db, nom,age,prix,matiere,ville,adresse,numero,mail,jour,heure,longueur,places, function() {
+        dataBase.close();
+      });
+     }
+     else{
+      createCour(db,nom , jour,heure,longueur,places, function() {
+        dataBase.close();
+       });
+     }
    });
- });
+
+  });
+});
 
  var url = 'mongodb://localhost:27017/Project-CAI';
 
