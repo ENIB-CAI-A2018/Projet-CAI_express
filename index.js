@@ -22,7 +22,7 @@ var findCours = function(db, courList,  callback) {
     });
  };
 
- var findprofesseur = function(db, profId,  callback) {
+ var findProfesseur = function(db, profId,  callback) {
    const cursor =db.collection(String(profId.toLowerCase()).replace(/ /g,"_")).find({});
    var prof;
    cursor.each(function(err, doc) {
@@ -98,8 +98,7 @@ app.get('/prof/:profId', function (req, res) {
    MongoClient.connect(url, function(err, dataBase) {
      assert.equal(null, err);
      const db=dataBase.db('Project-CAI');
-     findprofesseur(db, req.param('profId'),  function(prof) {
-       console.log(prof)
+     findProfesseur(db, req.param('profId'),  function(prof) {
        res.json(prof);
        dataBase.close();
      });
@@ -141,7 +140,7 @@ app.get('/prof/:profId', function (req, res) {
     assert.equal(null, err);
     const db=dataBase.db('Project-CAI');
 
-   findprofesseur(db, nom,  function(prof) {
+   findProfesseur(db, nom,  function(prof) {
      if(prof==null){
       var age=req.body.age;
       var prix=req.body.prix;
