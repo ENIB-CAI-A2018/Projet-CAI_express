@@ -80,6 +80,39 @@ var createCour = function(db, prof, jour, heure, longueur, places,  callback) {
   );  
 };
 
+var findUser = function(db, login,  callback) {
+  const cursor =db.collection("users").find({pseudo: login});
+   var user;
+   cursor.each(function(err, doc) {
+      assert.equal(err, null);
+      if (doc != null) {
+         user = doc;
+      } else {
+         callback(user);
+      }
+   }); 
+};
+
+var inscription = function(db, login, mdp,  callback) {
+  db.collection("users").insertOne({ 
+    pseudo : login,
+    mdp : mdp
+  });  
+};
+
+var login = function(db, login, mdp,  callback) {
+  const cursor =db.collection("users").find({pseudo: login, mdp:mdp});
+   var user;
+   cursor.each(function(err, doc) {
+      assert.equal(err, null);
+      if (doc != null) {
+         user = doc;
+      } else {
+         callback(user);
+      }
+   });  
+};
+
  app.get('/cours', function (req, res) {
     console.log('Received request for cours from', req.ip)
     MongoClient.connect(url, function(err, dataBase) {
@@ -127,7 +160,7 @@ app.get('/prof/:profId', function (req, res) {
    });
  });
 
- app.post('/createCour', function (req, res) {
+ app.post('/createCours', function (req, res) {
    console.log('Received request for create cour : '+req.body.nom+' from', req.ip);
    var nom=util.format("%j",req.body.nom);
    nom=nom.replace('"',"");
@@ -160,6 +193,46 @@ app.get('/prof/:profId', function (req, res) {
      }
    });
 
+  });
+});
+
+app.post('/inscription', function (req, res) {
+  console.log('Received request for inscription : '+req.body.login+' from', req.ip);
+  var login=req.body.login;
+  var mdp=req.body.mdp;
+  MongoClient.connect(url, function(err, dataBase) {
+    assert.equal(null, err);
+    const db=dataBase.db('Project-CAI');
+    findUser(db,login, function(user){
+      if (user==null){
+        inscription(db,login, mdp, function() {
+          res.end('It worked!');
+        });
+      }
+      else{
+        res.end('This pseudo already exist!');
+      }
+      dataBase.close();
+    });
+  });
+});
+
+app.post('/login', function (req, res) {
+  console.log('Received request for inscription : '+req.body.login+' from', req.ip);
+  var login=req.body.login;
+  var mdp=req.body.mdp;
+  MongoClient.connect(url, function(err, dataBase) {
+    assert.equal(null, err);
+    const db=dataBase.db('Project-CAI');
+    login(db,login, function(user){
+      if (user==null){
+        res.end("This pseudo doesn't exist!");
+      }
+      else {
+        res.end('It worked!');
+      }
+      dataBase.close();
+    });
   });
 });
 
