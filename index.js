@@ -80,8 +80,8 @@ var createCour = function(db, prof, jour, heure, longueur, places,  callback) {
   );  
 };
 
-var findUser = function(db, login,  callback) {
-  const cursor =db.collection("users").find({pseudo: login});
+var findUser = function(db, pseudo,  callback) {
+  const cursor =db.collection("users").find({pseudo: pseudo});
    var user;
    cursor.each(function(err, doc) {
       assert.equal(err, null);
@@ -93,15 +93,15 @@ var findUser = function(db, login,  callback) {
    }); 
 };
 
-var inscription = function(db, login, mdp,  callback) {
+var register = function(db, pseudo, mdp,  callback) {
   db.collection("users").insertOne({ 
-    pseudo : login,
+    pseudo : pseudo,
     mdp : mdp
   });  
 };
 
-var login = function(db, login, mdp,  callback) {
-  const cursor =db.collection("users").find({pseudo: login, mdp:mdp});
+var login = function(db, pseudo, mdp,  callback) {
+  const cursor =db.collection("users").find({pseudo: pseudo, mdp:mdp});
    var user;
    cursor.each(function(err, doc) {
       assert.equal(err, null);
@@ -196,16 +196,16 @@ app.get('/prof/:profId', function (req, res) {
   });
 });
 
-app.post('/inscription', function (req, res) {
-  console.log('Received request for inscription : '+req.body.login+' from', req.ip);
-  var login=req.body.login;
+app.post('/register', function (req, res) {
+  console.log('Received request for register : '+req.body.login+' from', req.ip);
+  var pseudo=req.body.login;
   var mdp=req.body.mdp;
   MongoClient.connect(url, function(err, dataBase) {
     assert.equal(null, err);
     const db=dataBase.db('Project-CAI');
-    findUser(db,login, function(user){
+    findUser(db,pseudo, function(user){
       if (user==null){
-        inscription(db,login, mdp, function() {
+        register(db,pseudo, mdp, function() {
           res.end('It worked!');
         });
       }
@@ -219,12 +219,12 @@ app.post('/inscription', function (req, res) {
 
 app.post('/login', function (req, res) {
   console.log('Received request for inscription : '+req.body.login+' from', req.ip);
-  var login=req.body.login;
+  var pseudo=req.body.login;
   var mdp=req.body.mdp;
   MongoClient.connect(url, function(err, dataBase) {
     assert.equal(null, err);
     const db=dataBase.db('Project-CAI');
-    login(db,login, function(user){
+    login(db,pseudo, mdp, function(user){
       if (user==null){
         res.end("This pseudo doesn't exist!");
       }
