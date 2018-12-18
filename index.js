@@ -123,8 +123,8 @@ var registerCours = function (db, nom, jour, heure, longueur, places, callback) 
       }
     },
     {
-      arrayFilters: [{ "elem.jour": jour }],
-      multi: true,
+      arrayFilters: [{ "elem.jour": jour }],//le filtre sur plusieur éléments ne fonctionne pas pour l'instant, on n'utilise donc que le jour
+      multi: true
     }
   );
 };
@@ -252,6 +252,7 @@ app.post('/login', function (req, res) {
   });
 });
 
+//Méthode permettant de s'inscrire dans un cour, pour cela, on passe le cour ainsi que le prof dans le json
 app.post('/registerCours', function (req, res) {
   console.log('Received request for register Cours : ' + req.body.nom + ' from', req.ip);
   var nom = util.format("%j", req.body.nom);
